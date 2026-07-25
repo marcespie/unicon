@@ -63,9 +63,10 @@ int fpoll(int argc, descriptor *argv)	/*: await data from file */
    /* there's no legal way to do this in C; we cheat */
    /* cheating leads to portability issues, skip this on MUSL/ALPINE */
 
-#ifdef __MUSL__
-      /*FIXME: this is always defined */
-      /* insert your implementation here */
+#if defined(__MUSL__) || __OpenBSD__
+#include <stdio_ext.h>
+   if (__freadahead(f) > 0)
+      RetArg(1);
 #elif __linux
    if (f->_IO_read_ptr < f->_IO_read_end)
       RetArg(1);
@@ -74,8 +75,6 @@ int fpoll(int argc, descriptor *argv)	/*: await data from file */
       RetArg(1);
 #elif __sun
    /* insert your implementation here */
-#elif __OpenBSD__
-   /* no way to do in OpenBSD, FILEs are opaque, sorry ! */
 #else
    if (f->_cnt > 0)
       RetArg(1);
